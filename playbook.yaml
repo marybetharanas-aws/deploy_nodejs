@@ -1,0 +1,31 @@
+---
+# Clone project from git repository
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Clone the project
+    git:
+     repo: "https://github.com/chrissiarivera-aws/WebMiniProject"
+     dest: /home/cnode/Projects/app
+        
+  - name: Start mongodb
+    command: mongod --bind_ip=127.0.0.1
+    async: 45
+    poll: 0
+    ignore_errors: yes
+     
+  - name: Install pm2
+    npm:
+     name: pm2
+     global: yes
+     state: present
+     
+  - name: Start pm2
+    command: pm2 startup
+     
+  - name: Start app
+    shell: pm2 start app.js
+    args:
+      chdir: "/home/cnode/Projects/app"
+    ignore_errors: yes
